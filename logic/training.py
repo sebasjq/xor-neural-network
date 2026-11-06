@@ -6,7 +6,7 @@ def train_epoch(network, learning_rate, rng):
     examples = list(XOR_DATA)
     rng.shuffle(examples)
 
-    for (x1, x2), target in XOR_DATA:
+    for (x1, x2), target in examples:
         network.train_step(x1, x2, target, learning_rate)
 
 # Calcula la pérdida media de la red neuronal. Como la 
