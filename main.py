@@ -9,15 +9,19 @@ def main():
     rng = Random()
 
     network = NeuralNetwork(
-        w_x1_h1=rng.uniform(-1, 1),
-        w_x2_h1=rng.uniform(-1, 1),
-        w_x1_h2=rng.uniform(-1, 1),
-        w_x2_h2=rng.uniform(-1, 1),
-        w_h1_o=rng.uniform(-1, 1),
-        w_h2_o=rng.uniform(-1, 1),
-        b_h1=0.1,
-        b_h2=0.1,
-        b_o=0.1,
+        w_x1_h1 = rng.uniform(-1, 1),
+        w_x2_h1 = rng.uniform(-1, 1),
+
+        w_x1_h2 = rng.uniform(-1, 1),
+        w_x2_h2 = rng.uniform(-1, 1),
+
+        w_h1_o = rng.uniform(-1, 1),
+        w_h2_o = rng.uniform(-1, 1),
+
+        b_h1 = rng.uniform(-1, 1),
+        b_h2 = rng.uniform(-1, 1),
+
+        b_o = rng.uniform(-1, 1),
     )
 
     learning_rate = 0.25
