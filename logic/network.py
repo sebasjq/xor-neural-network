@@ -4,6 +4,8 @@ def sigmoid(z):
     return 1 / (1 + exp(-z))
 
 class NeuralNetwork:
+
+    # Constructor de la clase NeuralNetwork. Inicializa los pesos y bias de la red neuronal.
     def __init__(
         self,
         *, # Los parámetros deben ser pasados como argumentos con nombre. Para evitar confusiones.
@@ -27,6 +29,7 @@ class NeuralNetwork:
         self.b_h2 = b_h2
         self.b_o = b_o
 
+    # Calcula la salida de la red neuronal para un par de entradas (x1, x2).
     def forward(self, x1, x2):
 
         # 1. Suma ponderada y activación de h1.
@@ -61,6 +64,8 @@ class NeuralNetwork:
         return h1, h2, output, delta_o, delta_h1, delta_h2
 
 
+    # Actualiza los pesos y bias de la red neuronal utilizando los deltas calculados y la tasa de aprendizaje.
+    # Se ejecuta solo una vez por cada ejemplo de entrenamiento en cada época.
     def train_step(self, x1, x2, target, learning_rate):
 
         h1, h2, output, delta_o, delta_h1, delta_h2 = (self.calculate_deltas(x1, x2, target))
