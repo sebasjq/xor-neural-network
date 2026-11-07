@@ -43,6 +43,8 @@ class XORSession:
         self._loss = None
         self._stop_reason = None
 
+        self._loss_history = []  # Lista para almacenar la pérdida de cada época
+
 
     # Continúa el intento activo o inicia uno nuevo con 
     # los argumentos recibidos.
@@ -98,9 +100,13 @@ class XORSession:
             "correct_count": sum(row["is_correct"] for row in results),
             "total_cases": len(results),
             "results": results,
+            "loss_history":[
+                {"epoch": epoch, "loss": loss}
+                for epoch, loss in enumerate(self._loss_history, start=1)]
         }
 
     def _advance(self):
+
         # Baraja los cuatro pares al empezar una época y conserva ese orden.
         if self._example_index == 0:
             self._examples = list(XOR_DATA)
@@ -112,9 +118,13 @@ class XORSession:
 
         # Evalúa la pérdida y las condiciones de parada al completar la época.
         if self._example_index == len(self._examples):
+
             self._example_index = 0
+
             self._epochs += 1
             self._loss = mean_loss(self.network)
+
+            self._loss_history.append(self._loss)  # Almacena la pérdida de la época actual
 
             if self._loss <= self._target_loss:
                 self._stop_reason = "target_loss"
