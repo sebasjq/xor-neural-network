@@ -25,7 +25,7 @@ def main():
     )
 
     learning_rate = 0.25
-    target_loss = 0.01 # Error minimo deseado para detener el entrenamiento.
+    target_loss = 0.001 # Error minimo deseado para detener el entrenamiento.
     max_epochs = 10_000
 
     epoch, loss = train(
