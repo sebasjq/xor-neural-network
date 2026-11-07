@@ -9,14 +9,14 @@ class XORSession:
     def __init__(self):
         self.network = None
 
-    def train(self, learning_rate=0.25, max_epochs=10_000,
-              target_loss=0.01, seed=None):
+    def train(self, learning_rate=0.25, max_epochs=10_000, target_loss=0.01, seed=None):
+
         if max_epochs < 1:
             raise ValueError("El máximo de épocas debe ser mayor que cero.")
 
         rng = Random(seed)
-        network = NeuralNetwork(
 
+        network = NeuralNetwork(
             w_x1_h1=rng.uniform(-1, 1),
             w_x2_h1=rng.uniform(-1, 1),
             w_x1_h2=rng.uniform(-1, 1),
@@ -26,7 +26,6 @@ class XORSession:
             b_h1=rng.uniform(-1, 1),
             b_h2=rng.uniform(-1, 1),
             b_o=rng.uniform(-1, 1),
-
         )
 
         epochs, loss = train_network(network, learning_rate, max_epochs, target_loss, rng)
@@ -46,7 +45,7 @@ class XORSession:
         }
 
     def predict(self, x1, x2):
-        
+
         if self.network is None:
             raise RuntimeError("Primero debes entrenar la red.")
 
