@@ -30,57 +30,92 @@
         </button>
 
         <div class="canvas-wrap" id="canvas-wrap">
-          <svg id="network-canvas" viewBox="0 0 860 440" role="img" aria-label="Red neuronal Xor con dos entradas, dos neuronas ocultas y una salida"></svg>
+          <svg id="network-canvas" data-intro="wait" viewBox="0 0 860 440" role="img" aria-label="Red neuronal Xor con dos entradas, dos neuronas ocultas y una salida"></svg>
         </div>
 
-        <div class="zoom-controls" role="group" aria-label="Navegación del tablero">
-          <button class="zoom-action liquid-glass glass-button" type="button" id="pan-button" aria-label="Activar o desactivar el arrastre" aria-pressed="true" title="Mover el tablero">
-            <span class="icon-disc">
-              <svg class="control-icon" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M12 3v6m0 6v6M3 12h6m6 0h6M12 3l-2 2m2-2 2 2M12 21l-2-2m2 2 2-2M3 12l2-2m-2 2 2 2M21 12l-2-2m2 2-2 2"/>
-              </svg>
-            </span>
+        <div class="view-dock liquid-glass" role="toolbar" aria-label="Navegación del tablero">
+          <button class="dock-button" type="button" id="pan-button" aria-label="Activar o desactivar el arrastre" aria-pressed="true" title="Mover el tablero">
+            <svg class="control-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 2v20M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M5 9l-3 3 3 3M9 5l3-3 3 3"/>
+            </svg>
           </button>
-          <div class="zoom-slider liquid-glass glass-button" role="group" aria-label="Nivel de zoom">
-            <label class="zoom-slider-label" for="zoom-slider">Zoom</label>
-            <button class="zoom-step" type="button" data-zoom-step="-1" aria-label="Alejar" title="Alejar">−</button>
-            <input id="zoom-slider" type="range" min="65" max="210" value="100" step="1" aria-label="Nivel de zoom">
-            <output id="zoom-label" for="zoom-slider">100</output>
-            <button class="zoom-step" type="button" data-zoom-step="1" aria-label="Acercar" title="Acercar">+</button>
+          <span class="dock-divider" aria-hidden="true"></span>
+          <button class="dock-button" type="button" data-zoom-step="-1" aria-label="Alejar" title="Alejar">
+            <svg class="control-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg>
+          </button>
+          <output class="dock-readout" id="zoom-label" aria-live="off" aria-label="Nivel de zoom">100%</output>
+          <button class="dock-button" type="button" data-zoom-step="1" aria-label="Acercar" title="Acercar">
+            <svg class="control-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg>
+          </button>
+          <span class="dock-divider" aria-hidden="true"></span>
+          <button class="dock-button" type="button" data-zoom="reset" aria-label="Restablecer vista" title="Restablecer vista" aria-disabled="true">
+            <svg class="control-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/>
+              <circle cx="12" cy="12" r="1.2"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="stage-card liquid-glass" id="stage-card" data-mode="guided" hidden>
+          <div class="stage-head">
+            <ol class="stage-steps" aria-label="Fases del ciclo de aprendizaje">
+              <li data-phase="forward">Adelante</li>
+              <li data-phase="error">Error</li>
+              <li data-phase="backward" title="Retropropagación (backpropagation)">Atrás</li>
+              <li data-phase="update">Ajuste</li>
+            </ol>
+            <span class="stage-count" id="stage-count"></span>
           </div>
-          <button class="zoom-action liquid-glass glass-button" type="button" data-zoom="reset" aria-label="Restablecer vista" title="Restablecer vista">
-            <span class="icon-disc">
-              <svg class="control-icon" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M4 4v5h5M4.6 9A8 8 0 1 1 6.7 17"/>
-              </svg>
-            </span>
-          </button>
+          <div class="stage-body">
+            <p class="stage-text" id="stage-text"></p>
+            <svg class="stage-spark" id="stage-spark" viewBox="0 0 96 28" aria-hidden="true"></svg>
+            <div class="stage-actions" id="stage-actions">
+              <button class="stage-action" id="stage-skip" type="button" title="Acelerar" aria-label="Acelerar">
+                <svg class="control-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 19l9-7-9-7zM2 19l9-7-9-7z"/></svg>
+              </button>
+              <button class="stage-action danger" id="stage-stop" type="button" title="Detener" aria-label="Detener">
+                <svg class="control-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10v10H7z"/></svg>
+              </button>
+            </div>
+          </div>
         </div>
       </section>
 
-      <aside class="liquid-glass drawer drawer-left" id="training-drawer" aria-labelledby="training-title" inert>
+      <aside class="liquid-glass drawer drawer-left" id="training-drawer" aria-labelledby="training-title" tabindex="-1" inert>
         <header class="drawer-header">
           <h2 id="training-title">Entrenamiento</h2>
-          <button class="liquid-glass close-button" type="button" data-close-drawer aria-label="Cerrar entrenamiento">
-            <svg class="control-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17"/></svg>
-          </button>
+          <kbd class="drawer-hint" aria-hidden="true">Esc</kbd>
         </header>
         <div class="drawer-content" tabindex="0">
-          <p class="training-explanation">Entrenar red avanza automáticamente hasta la pérdida objetivo o el límite de épocas. Un paso procesa un ejemplo; cuatro pasos completan una época.</p>
+          <p class="training-explanation">Un ejemplo es una fila de la tabla Xor. Cuatro ejemplos forman una época.</p>
           <p class="training-plan" id="training-plan"></p>
           <div class="actions">
             <button class="liquid-glass button primary" id="train-button" type="button">
               <svg class="control-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 11 7-11 7z"/></svg>
-              Entrenar red
+              <strong>Entrenar</strong>
+              <small>Automático</small>
             </button>
             <button class="liquid-glass button secondary" id="step-button" type="button">
               <svg class="control-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h12m-5-5 5 5-5 5m9-11v12"/></svg>
-              Avanzar un ejemplo
+              <strong>Un ejemplo</strong>
+              <small>Manual</small>
             </button>
           </div>
+          <div class="speed" role="radiogroup" aria-labelledby="speed-label">
+            <span class="speed-label" id="speed-label">Velocidad</span>
+            <div class="segmented">
+              <label><input type="radio" name="speed" value="slow"><span>Lenta</span></label>
+              <label><input type="radio" name="speed" value="normal" checked><span>Normal</span></label>
+              <label><input type="radio" name="speed" value="fast"><span>Rápida</span></label>
+            </div>
+          </div>
+          <dl class="mode-help">
+            <div><dt>Entrenar</dt><dd>Repite ejemplos solo: los primeros en cámara lenta y el resto acelerado, hasta la pérdida objetivo.</dd></div>
+            <div><dt>Un ejemplo</dt><dd>Procesa una sola fila y se detiene para que veas cada fase.</dd></div>
+          </dl>
           <p class="step-status" id="step-status" role="status"></p>
           <details class="panel-section" id="step-details" hidden>
-            <summary>Detalle del último paso</summary>
+            <summary>Detalle del último ejemplo</summary>
             <div class="step-readout" id="step-readout"></div>
           </details>
           <details class="panel-section" id="training-options">
@@ -91,19 +126,20 @@
               <label>Pérdida objetivo<input id="target-loss" type="number" min="0.0001" max="0.5" step="0.0001" value="0.01" required aria-describedby="parameter-help settings-feedback"></label>
               <label>Semilla <span class="optional">(opcional)</span><input id="seed" type="number" min="-2147483648" max="2147483647" step="1" placeholder="Aleatoria" aria-describedby="parameter-help settings-feedback"></label>
               <p class="settings-hint settings-feedback" id="settings-feedback" role="status"></p>
-              <p class="settings-hint">Si cambias los parámetros, el próximo entrenamiento o paso inicia una nueva red.</p>
+              <p class="settings-hint">Si cambias los parámetros, el próximo entrenamiento o ejemplo inicia una nueva red.</p>
             </form>
           </details>
-          <button class="button ghost" id="reset-button" type="button">Reiniciar sin entrenar</button>
+          <button class="button ghost" id="reset-button" type="button">
+            <svg class="control-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8M3 3v5h5"/></svg>
+            Reiniciar sin entrenar
+          </button>
         </div>
       </aside>
 
-      <aside class="liquid-glass drawer drawer-right" id="results-drawer" aria-labelledby="results-title" inert>
+      <aside class="liquid-glass drawer drawer-right" id="results-drawer" aria-labelledby="results-title" tabindex="-1" inert>
         <header class="drawer-header">
           <h2 id="results-title">Resultados</h2>
-          <button class="liquid-glass close-button" type="button" data-close-drawer aria-label="Cerrar resultados">
-            <svg class="control-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17"/></svg>
-          </button>
+          <kbd class="drawer-hint" aria-hidden="true">Esc</kbd>
         </header>
         <div class="drawer-content" tabindex="0">
           <div class="metrics">

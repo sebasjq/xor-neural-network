@@ -8,6 +8,7 @@ from threading import Lock
 from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
+STATIC_ROOT = Path(__file__).resolve().parent / "static"
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -202,9 +203,9 @@ class RequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         route = urlparse(self.path).path
         if route == "/" or route == "/index.html":
-            self.serve_file(ROOT / "static" / "index.html")
+            self.serve_file(STATIC_ROOT / "index.html")
         elif route in ("/app.js", "/style.css"):
-            self.serve_file(ROOT / "static" / route.lstrip("/"))
+            self.serve_file(STATIC_ROOT / route.lstrip("/"))
         elif route == "/api/state":
             with APP_STATE.lock:
                 self.send_json(APP_STATE.snapshot())
