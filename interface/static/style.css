@@ -533,8 +533,8 @@ body::before {
     1px 1px 1px 0 #ffffffe6 inset,
     -1px -1px 1px 0 #ffffffe6 inset,
     0 0 16px 0 #0000000a;
-  -webkit-backdrop-filter: var(--glass-filter, blur(18px) saturate(1.35) contrast(1.05));
-  backdrop-filter: var(--glass-filter, blur(18px) saturate(1.35) contrast(1.05));
+  -webkit-backdrop-filter: var(--glass-filter, blur(14px) saturate(1.25) contrast(1.03));
+  backdrop-filter: var(--glass-filter, blur(14px) saturate(1.25) contrast(1.03));
 }
 .liquid-glass.glass-button {
   background: #ffffff3d;

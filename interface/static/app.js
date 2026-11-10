@@ -1006,6 +1006,7 @@ request('/api/state')
 function initializeGlass() {
   if (!window.DisplacementUtils || !window.ResizeObserver) return;
   const surfaces = new Map();
+  let frame = 0;
 
   document.querySelectorAll('.liquid-glass').forEach(element => {
     surfaces.set(element, { size: '' });
@@ -1023,16 +1024,20 @@ function initializeGlass() {
       width,
       height,
       radius,
-      depth: 5,
-      strength: 40,
-      chromaticAberration: 2,
+      depth: 3,
+      strength: 28,
+      chromaticAberration: 1,
     });
-    target.style.setProperty('--glass-filter', `blur(1px) url('${filter}') blur(2px) brightness(1.1) saturate(1.5)`);
+    target.style.setProperty('--glass-filter', `blur(1px) url('${filter}') brightness(1.1) saturate(1.4)`);
     surfaces.get(target).size = nextSize;
   };
 
-  const observer = new ResizeObserver(entries => {
-    entries.forEach(({ target }) => applyGlass(target));
+  const observer = new ResizeObserver(() => {
+    if (frame) return;
+    frame = requestAnimationFrame(() => {
+      frame = 0;
+      surfaces.forEach((_, element) => applyGlass(element));
+    });
   });
   surfaces.forEach((_, element) => observer.observe(element, { box: 'border-box' }));
   surfaces.forEach((_, element) => applyGlass(element));
