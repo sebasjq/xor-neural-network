@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>XOR Lab</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark">×</span><div><strong>XOR lab</strong><span>neural network studio</span></div></div>
+      <div class="status"><i id="status-dot"></i><span id="status-text">Sin iniciar</span></div>
+    </header>
+
+    <section class="intro">
+      <div><p class="eyebrow">VISUALIZADOR 2 · 2 · 1</p><h1>Observa cómo aprende<br><em>la función XOR.</em></h1></div>
+      <p class="intro-copy">Explora cada conexión, activa la red paso a paso o deja que encuentre la solución automáticamente.</p>
+    </section>
+
+    <section class="workspace">
+      <div class="network-panel">
+        <div class="panel-head"><div><span class="eyebrow">ARQUITECTURA</span><h2>Flujo de activación</h2></div><div class="zoom-controls"><button data-zoom="out" title="Alejar">−</button><span id="zoom-label">100%</span><button data-zoom="in" title="Acercar">+</button><button data-zoom="reset" title="Restablecer vista">↺</button></div></div>
+        <div class="canvas-wrap" id="canvas-wrap"><svg id="network-canvas" viewBox="0 0 900 440" role="img" aria-label="Visualización de la red neuronal XOR"></svg><div class="canvas-hint">Arrastra para explorar · rueda para zoom</div></div>
+        <div class="legend"><span><i class="swatch positive"></i>Peso positivo</span><span><i class="swatch negative"></i>Peso negativo</span><span><i class="swatch neutral"></i>Sin conexión</span></div>
+      </div>
+
+      <aside class="control-panel">
+        <div class="panel-head compact"><div><span class="eyebrow">CONTROL</span><h2>Entrenamiento</h2></div></div>
+        <div class="metrics"><div><span>Épocas</span><strong id="metric-epochs">0</strong></div><div><span>Pérdida</span><strong id="metric-loss">—</strong></div><div><span>Aciertos</span><strong id="metric-accuracy">—</strong></div></div>
+        <div class="actions"><button class="button primary" id="train-button"><span>▶</span> Entrenar red</button><button class="button secondary" id="step-button"><span>↦</span> Siguiente paso</button><button class="button ghost" id="reset-button">Reiniciar red</button></div>
+        <div class="settings"><label>Tasa de aprendizaje<input id="learning-rate" type="number" min="0" step="0.01" value="0.25"></label><label>Épocas máximas<input id="max-epochs" type="number" min="1" step="100" value="10000"></label><label>Pérdida objetivo<input id="target-loss" type="number" min="0" step="0.001" value="0.01"></label><label>Semilla <span class="optional">opcional</span><input id="seed" type="number" step="1" placeholder="aleatoria"></label></div>
+        <div class="step-readout" id="step-readout"><span class="eyebrow">ÚLTIMA ACTUALIZACIÓN</span><p>Inicia una red para ver el detalle de cada iteración.</p></div>
+      </aside>
+    </section>
+
+    <section class="lower-grid"><div class="chart-panel"><div class="panel-head compact"><div><span class="eyebrow">HISTORIAL</span><h2>Pérdida por época</h2></div><span class="chart-value" id="chart-value">—</span></div><div class="chart-wrap"><svg id="loss-chart" viewBox="0 0 720 190" preserveAspectRatio="none"></svg></div></div><div class="predictions-panel"><div class="panel-head compact"><div><span class="eyebrow">VALIDACIÓN</span><h2>Tabla XOR</h2></div></div><div class="prediction-table" id="prediction-table"></div></div></section>
+    <footer><span>Sesión local · datos en memoria</span><span id="footer-message">Listo para experimentar</span></footer>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>
