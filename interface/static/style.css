@@ -4,6 +4,7 @@
   --muted: #50617f;
   --blue: #315de9;
   --negative: #c24868;
+  --back: #e8772e;
   --neutral: #7182a2;
   --line: #9eafd64d;
   --ui-font: -apple-system, BlinkMacSystemFont, "Segoe UI Variable Text", "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
@@ -41,7 +42,6 @@ button:focus-visible, input:focus-visible {
 }
 button:disabled { opacity: .55; cursor: wait; }
 h1, h2, h3, p { margin: 0; }
-.filter-definitions { position: absolute; }
 
 body::before {
   content: "";
@@ -135,33 +135,22 @@ body::before {
 .network-link, .edge-weight { --link-color: var(--neutral); }
 .network-link.positive, .edge-weight.positive { --link-color: var(--blue); }
 .network-link.negative, .edge-weight.negative { --link-color: var(--negative); }
-.link-track, .link-signal {
-  fill: none;
-  stroke: var(--link-color);
-  stroke-linecap: round;
-}
+.link-track, .link-signal, .link-back { fill: none; stroke-linecap: round; }
+.link-track, .link-signal { stroke: var(--link-color); }
+.link-signal, .link-back { opacity: 0; stroke-dasharray: 14 100; }
 .link-track { opacity: .46; }
-.link-signal {
-  opacity: 0;
-  stroke-width: 4;
-  stroke-dasharray: 14 100;
-}
+.link-signal { stroke-width: 4; }
 /* Señal de error: recorre la conexión al revés durante la retropropagación */
-.link-back {
-  fill: none;
-  stroke: var(--back);
-  stroke-linecap: round;
-  stroke-width: 4.5;
-  stroke-dasharray: 14 100;
-  opacity: 0;
-}
-.edge-weight {
+.link-back { stroke: var(--back); stroke-width: 4.5; }
+.edge-weight, .edge-delta, .node-error {
   font-family: var(--ui-font);
-  fill: var(--link-color);
   paint-order: stroke;
   stroke: #f4f7ff;
   stroke-width: 5px;
   stroke-linejoin: round;
+}
+.edge-weight {
+  fill: var(--link-color);
   font-size: 14px;
   font-weight: 600;
 }
@@ -176,7 +165,6 @@ body::before {
 }
 .node-shell { fill: url("#node-fill"); stroke: #fff; stroke-width: 1.5; filter: url("#node-shadow"); }
 .output .node-shell { fill: url("#output-fill"); }
-.node-track, .node-level { display: none; }
 .node-label { fill: var(--ink); font-size: 16px; font-weight: 700; }
 .node-value { fill: var(--muted); font-size: 15px; font-weight: 550; }
 .layer-label { fill: var(--muted); font-size: 16px; font-weight: 600; font-family: var(--ui-font); }
@@ -312,16 +300,18 @@ body::before {
 .drawer-content { padding: 2px 20px 14px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; }
 .drawer-content::-webkit-scrollbar { display: none; }
 .drawer-content:focus-visible { outline: 2px solid var(--blue); outline-offset: -3px; }
-.actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.actions { display: grid; gap: 8px; margin-bottom: 16px; }
 .actions .button {
-  flex-direction: column;
-  gap: 3px;
-  min-height: 78px;
-  padding: 12px 8px;
-  border-radius: 16px;
-  text-align: center;
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  gap: 3px 10px;
+  min-height: 64px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  text-align: left;
 }
-.actions .button .control-icon { width: 21px; height: 21px; margin-bottom: 2px; }
+.actions .button .control-icon { grid-row: 1 / 3; width: 21px; height: 21px; }
+.actions .button small { grid-column: 2; }
 .actions .button strong { font-size: .9rem; font-weight: 650; line-height: 1.2; }
 .actions .button small { font-size: .7rem; font-weight: 500; line-height: 1.2; opacity: .82; }
 .button {
@@ -433,8 +423,7 @@ body::before {
   gap: 12px;
   padding: 4px 0 14px;
 }
-.settings-hint { grid-column: 1 / -1; }
-.settings-hint { color: var(--muted); font-size: .72rem; line-height: 1.35; }
+.settings-hint { grid-column: 1 / -1; color: var(--muted); font-size: .72rem; line-height: 1.35; }
 .training-explanation { color: var(--muted); font-size: .8rem; line-height: 1.5; margin-bottom: 8px; }
 .training-plan { font-size: .8rem; font-weight: 600; line-height: 1.45; margin-bottom: 14px; }
 .settings-feedback:empty { display: none; }
@@ -550,13 +539,6 @@ body::before {
   background: #c5d5ff59;
   color: #2948b4;
 }
-.drawer.liquid-glass {
-  background: #ffffff66;
-  box-shadow:
-    1px 1px 1px 0 #ffffffe6 inset,
-    -1px -1px 1px 0 #ffffffe6 inset,
-    0 0 16px 0 #0000000a;
-}
 .drawer-content { text-shadow: 0 1px 2px #ffffff80; }
 
 /* Animaciones de aparición.
@@ -626,7 +608,6 @@ body::before {
 #network-canvas[data-intro="play"] .network-node.output .node-halo { animation-delay: .4s; }
 
 /* ===== Ciclo de entrenamiento: adelante · error · atrás · ajuste ===== */
-:root { --back: #e8772e; }
 #network-canvas { --stage-ms: 700ms; }
 @keyframes sig-fwd {
   0% { stroke-dashoffset: 14; opacity: 0; }
@@ -685,13 +666,8 @@ body::before {
 /* Cambio de cada peso (Δ) y error de la salida */
 .edge-delta, .node-error {
   fill: var(--back);
-  font-family: var(--ui-font);
   font-weight: 650;
   font-variant-numeric: tabular-nums;
-  paint-order: stroke;
-  stroke: #f4f7ff;
-  stroke-width: 5px;
-  stroke-linejoin: round;
   opacity: 0;
   transition: opacity .35s ease;
 }
@@ -818,18 +794,16 @@ body::before {
 }
 .segmented input:focus-visible + span { outline: 2px solid var(--blue); outline-offset: 2px; }
 
-/* Diferencia entre "Entrenar" y "Un ejemplo" */
-.mode-help { display: grid; gap: 7px; margin: 0 0 12px; }
-.mode-help dt { display: flex; align-items: center; gap: 6px; font-size: .74rem; font-weight: 650; }
-.mode-help dt::before {
-  content: "";
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--blue);
-}
-.mode-help div:nth-child(2) dt::before { background: #fff; box-shadow: inset 0 0 0 1.5px var(--blue); }
-.mode-help dd { margin: 1px 0 0; padding-left: 14px; color: var(--muted); font-size: .72rem; line-height: 1.4; }
+/* El panel de entrenamiento abre como una sola superficie. */
+#training-drawer { transform: translateY(-6px); transition: opacity .18s ease, transform .18s ease, visibility 0s .18s; }
+#training-drawer.is-open { transform: none; transition-delay: 0s; }
+#training-drawer .drawer-header,
+#training-drawer .drawer-content > * { animation: none; }
+#training-drawer .training-explanation { margin-bottom: 16px; }
+#training-drawer .button.secondary { background: #ffffff40; box-shadow: none; }
+#training-drawer .speed { margin-top: 10px; }
+#training-drawer .training-plan { color: var(--muted); font-size: .72rem; font-weight: 400; margin-bottom: 8px; }
+#training-drawer .step-status:empty { display: none; }
 
 @media (max-width: 650px) {
   :root { --drawer-top: calc(var(--top-gap) + 92px); }

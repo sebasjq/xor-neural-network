@@ -1,6 +1,15 @@
-const $ = (selector) => document.querySelector(selector);
+const $ = selector => document.querySelector(selector);
+const $$ = selector => [...document.querySelectorAll(selector)];
 const svg = $('#network-canvas');
 const lossChart = $('#loss-chart');
+// El SVG se reemplaza al dibujar la red; la caché se renueva en ese momento.
+const sceneElements = new Map();
+const scene = selector => {
+  if (!sceneElements.has(selector)) sceneElements.set(selector, svg.querySelector(selector));
+  return sceneElements.get(selector);
+};
+const weightTone = value => value > 0 ? 'positive' : value < 0 ? 'negative' : 'neutral';
+const weightWidth = value => Math.min(4, 1.6 + Math.abs(value ?? 0) * .8);
 const canvasWrap = $('#canvas-wrap');
 const workspace = $('.workspace');
 const compactBoard = matchMedia('(max-width: 650px)');
@@ -20,7 +29,7 @@ const stageCount = $('#stage-count');
 const stageSpark = $('#stage-spark');
 const stageSkip = $('#stage-skip');
 const stageStop = $('#stage-stop');
-const stagePills = [...document.querySelectorAll('.stage-steps li')];
+const stagePills = $$('.stage-steps li');
 let viewTween = 0;
 let introTimer = 0;
 let cardTimer = 0;
@@ -65,7 +74,7 @@ function closeDrawer(restoreFocus = true) {
   activeDrawer = null;
 }
 
-document.querySelectorAll('.drawer-toggle').forEach(toggle => {
+$$('.drawer-toggle').forEach(toggle => {
   const panel = document.getElementById(toggle.getAttribute('aria-controls'));
   toggle.addEventListener('click', () => {
     if (activeDrawer?.panel === panel) {
@@ -102,7 +111,7 @@ document.addEventListener('keydown', event => {
 // ——— Desplegables internos (los de la flechita) con altura animada ———
 // El cierre exclusivo de "Resultados" lo gestiona este código (en vez del
 // atributo `name`) para poder animar también el que se cierra.
-document.querySelectorAll('details[name]').forEach(details => {
+$$('details[name]').forEach(details => {
   details.dataset.group = details.getAttribute('name');
   details.removeAttribute('name');
 });
@@ -113,7 +122,7 @@ function toggleDetails(details, willOpen) {
   const summary = details.querySelector(':scope > summary');
   const content = [...details.children].filter(child => child !== summary);
   if (willOpen && details.dataset.group) {
-    document.querySelectorAll(`details[data-group="${details.dataset.group}"]`).forEach(other => {
+    $$(`details[data-group="${details.dataset.group}"]`).forEach(other => {
       if (other !== details && isDetailsOpen(other)) toggleDetails(other, false);
     });
   }
@@ -138,7 +147,7 @@ function toggleDetails(details, willOpen) {
   // Recorta el contenido que sobra mientras cambia la altura, sin cortar el
   // fondo de la fila ni el anillo de foco a los lados.
   details.style.clipPath = 'inset(-6px -12px 0 -12px)';
-  const duration = willOpen ? 400 : 300;
+  const duration = details.closest('#training-drawer') ? 180 : willOpen ? 400 : 300;
   const easing = 'cubic-bezier(.16, 1, .3, 1)';
   const height = details.animate(
     [{ height: start + 'px' }, { height: end + 'px' }],
@@ -211,7 +220,7 @@ function update(data) {
 
 function updateNetworkView() {
   const width = compactBoard.matches ? 540 : 860;
-  svg.querySelector('.network-scene').setAttribute('transform',
+  scene('.network-scene').setAttribute('transform',
     `translate(${width / 2 + state.panX} ${220 + state.panY}) scale(${state.zoom}) translate(${-width / 2} -220)`);
   updateDock();
 }
@@ -260,9 +269,9 @@ function drawNetwork() {
     const reach = (x2 - x1) * .45;
     const path = `M${x1} ${y1} C${x1 + reach} ${y1} ${x2 - reach} ${y2} ${x2} ${y2}`;
     const value = parameters[key];
-    const tone = value > 0 ? 'positive' : value < 0 ? 'negative' : 'neutral';
+    const tone = weightTone(value);
     const stage = to === 'out' ? 'second' : 'first';
-    const thickness = Math.min(4, 1.6 + Math.abs(value ?? 0) * .8);
+    const thickness = weightWidth(value);
     const t = labelPosition;
     const u = 1 - t;
     const x = u ** 3 * x1 + 3 * u ** 2 * t * (x1 + reach) + 3 * u * t ** 2 * (x2 - reach) + t ** 3 * x2;
@@ -311,12 +320,13 @@ function drawNetwork() {
     ${links.map(link => link.path).join('')}${links.map(link => link.label).join('')}${nodes.join('')}${layers.join('')}
     ${example}
   </g>`;
+  sceneElements.clear();
   updateNetworkView();
 }
 
 // ——— Pintado "en el sitio": cambian números y colores sin redibujar la red ———
 function setNodeValue(key, text, flash = false) {
-  const element = svg.querySelector(`.network-node[data-node="${key}"] .node-value`);
+  const element = scene(`.network-node[data-node="${key}"] .node-value`);
   if (!element) return;
   element.textContent = text;
   if (flash && !reducedMotion.matches) {
@@ -325,7 +335,7 @@ function setNodeValue(key, text, flash = false) {
 }
 
 function setNodeNote(text) {
-  const note = svg.querySelector('.node-error');
+  const note = scene('.node-error');
   if (note) note.textContent = text;
 }
 
@@ -333,25 +343,21 @@ function paintWeights(parameters) {
   edges.forEach(([, , key]) => {
     const value = parameters[key];
     if (value == null) return;
-    const tone = value > 0 ? 'positive' : value < 0 ? 'negative' : 'neutral';
-    const group = svg.querySelector(`.network-link[data-edge="${key}"]`);
-    const label = svg.querySelector(`.edge-weight[data-edge="${key}"]`);
-    if (group) {
-      group.classList.remove('positive', 'negative', 'neutral');
-      group.classList.add(tone);
-      group.querySelector('.link-track').setAttribute('stroke-width', Math.min(4, 1.6 + Math.abs(value) * .8));
+    const tone = weightTone(value);
+    const group = scene(`.network-link[data-edge="${key}"]`);
+    const label = scene(`.edge-weight[data-edge="${key}"]`);
+    for (const element of [group, label].filter(Boolean)) {
+      element.classList.remove('positive', 'negative', 'neutral');
+      element.classList.add(tone);
     }
-    if (label) {
-      label.classList.remove('positive', 'negative', 'neutral');
-      label.classList.add(tone);
-      label.textContent = format(value, 3);
-    }
+    if (group) scene(`.network-link[data-edge="${key}"] .link-track`).setAttribute('stroke-width', weightWidth(value));
+    if (label) label.textContent = format(value, 3);
   });
 }
 
 function paintDeltas(before, after) {
   edges.forEach(([, , key]) => {
-    const element = svg.querySelector(`.edge-delta[data-edge="${key}"]`);
+    const element = scene(`.edge-delta[data-edge="${key}"]`);
     if (!element) return;
     const delta = (after[key] ?? 0) - (before[key] ?? after[key] ?? 0);
     element.textContent = 'Δ ' + signed(delta, 3);
@@ -422,19 +428,21 @@ function hideCard() {
   workspace.classList.remove('has-stage');
 }
 
-function drawSpark(history) {
-  if (history.length < 2) {
-    stageSpark.innerHTML = '';
-    return;
-  }
+// Ambas gráficas comparten escala y muestreo; siempre incluyen el último dato.
+function chartPoints(history, width, height, left, bottom, limit, digits) {
   const max = history.reduce((peak, row) => Math.max(peak, row.loss), .01);
-  const stride = Math.ceil(history.length / 80);
-  const point = (row, index) =>
-    `${(2 + index / (history.length - 1) * 92).toFixed(1)},${(26 - row.loss / max * 22).toFixed(1)}`;
+  const last = history.length - 1;
+  const point = index => [left + index / Math.max(1, last) * width,
+    bottom - history[index].loss / max * height].map(value => digits == null ? value : value.toFixed(digits)).join(',');
   const points = [];
-  for (let index = 0; index < history.length - 1; index += stride) points.push(point(history[index], index));
-  points.push(point(history.at(-1), history.length - 1));
-  stageSpark.innerHTML = `<polyline points="${points.join(' ')}" fill="none" stroke="#315de9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
+  for (let index = 0; index < last; index += Math.ceil(history.length / limit)) points.push(point(index));
+  if (last >= 0) points.push(point(last));
+  return points;
+}
+
+function drawSpark(history) {
+  stageSpark.innerHTML = history.length < 2 ? '' :
+    `<polyline points="${chartPoints(history, 92, 22, 2, 26, 80, 1).join(' ')}" fill="none" stroke="#315de9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
 }
 
 // ——— Control de la ejecución animada ———
@@ -526,7 +534,7 @@ function renderRunUI() {
   const training = state.run?.mode === 'train';
   trainButton.classList.toggle('is-running', training);
   trainButton.querySelector('strong').textContent = training ? 'Detener' : 'Entrenar';
-  trainButton.querySelector('small').textContent = training ? 'Pausar aquí' : 'Automático';
+  trainButton.querySelector('small').textContent = training ? 'Pausar aquí' : 'Aprende hasta alcanzar el objetivo';
   trainButton.querySelector('path').setAttribute('d', training ? 'M7 7h10v10H7z' : 'm9 5 11 7-11 7z');
   refreshSettings();
 }
@@ -582,16 +590,15 @@ async function animateExample(previous, data, run, factor = 1) {
     setStageText(text);
   };
 
-  enter('forward-hidden', 'forward', `La entrada (${first}, ${second}) viaja hacia las neuronas ocultas.`);
-  await run.sleep(ms * .72);
-  setNodeValue('h1', format(h1, 2), true);
-  setNodeValue('h2', format(h2, 2), true);
-  await run.sleep(ms * .28);
-
-  enter('forward-output', 'forward', `Las ocultas envían su resultado a la salida: ${format(output, 2)}.`);
-  await run.sleep(ms * .72);
-  setNodeValue('out', format(output, 2), true);
-  await run.sleep(ms * .28);
+  for (const [stage, text, values] of [
+    ['forward-hidden', `La entrada (${first}, ${second}) viaja hacia las neuronas ocultas.`, { h1, h2 }],
+    ['forward-output', `Las ocultas envían su resultado a la salida: ${format(output, 2)}.`, { out: output }],
+  ]) {
+    enter(stage, 'forward', text);
+    await run.sleep(ms * .72);
+    Object.entries(values).forEach(([key, value]) => setNodeValue(key, format(value, 2), true));
+    await run.sleep(ms * .28);
+  }
 
   enter('error', 'error', `Se esperaba ${step.expected} y la red dio ${format(output, 2)}: error ${signed(error, 2)}.`);
   setNodeNote(`error ${signed(error, 2)}`);
@@ -639,17 +646,22 @@ async function fastForward(previous, data, run) {
 
   await new Promise(resolve => {
     const start = performance.now();
+    let renderedCount = -1;
+    let loss;
     const frame = now => {
       const t = run.fast || reducedMotion.matches ? 1 : Math.min(1, (now - start) / duration);
       const eased = t < .5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2;
       const epochs = Math.round(startEpochs + (endEpochs - startEpochs) * eased);
       const count = Math.max(1, Math.round(startLength + (history.length - startLength) * eased));
-      const slice = history.slice(0, count);
-      const loss = slice.at(-1)?.loss;
+      if (count !== renderedCount) {
+        const slice = history.slice(0, count);
+        loss = slice.at(-1)?.loss;
+        $('#metric-loss').textContent = format(loss, 5);
+        drawChart(slice);
+        drawSpark(slice);
+        renderedCount = count;
+      }
       $('#metric-epochs').textContent = epochs.toLocaleString('es-CO');
-      $('#metric-loss').textContent = format(loss, 5);
-      drawChart(slice);
-      drawSpark(slice);
       paintWeights(mix(before, after, eased));
       markPhase(PHASES[Math.floor(now / 230) % PHASES.length]);
       setStageText(`Acelerando · época ${epochs.toLocaleString('es-CO')} · pérdida ${format(loss, 4)}`, false);
@@ -712,15 +724,8 @@ function drawChart(history) {
     lossChart.innerHTML = '<text x="160" y="68" text-anchor="middle" fill="#50617f" font-size="11">Entrena para ver la curva de aprendizaje</text>';
     return;
   }
-  const max = history.reduce((peak, row) => Math.max(peak, row.loss), .01);
-  const point = (row, index) => [12 + index / Math.max(1, history.length - 1) * 296, 112 - row.loss / max * 96];
-  const stride = Math.ceil(history.length / 600);
-  const points = [];
-  for (let index = 0; index < history.length - 1; index += stride) {
-    points.push(point(history[index], index).join(','));
-  }
-  const [endX, endY] = point(last, history.length - 1);
-  points.push(endX + ',' + endY);
+  const points = chartPoints(history, 296, 96, 12, 112, 600);
+  const [endX, endY] = points.at(-1).split(',');
   lossChart.innerHTML = `<path d="M12 16v96h296" fill="none" stroke="#b7c6e0"/>
     <polyline points="${points.join(' ')}" fill="none" stroke="#315de9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
     <circle cx="${endX}" cy="${endY}" r="3.5" fill="#315de9"/>`;
@@ -840,7 +845,7 @@ function refreshSettings() {
   trainButton.disabled = state.run?.mode === 'train' ? state.run.stopped : blocked;
   stepButton.disabled = blocked || (finished && !changed);
   $('#reset-button').disabled = blocked;
-  document.querySelectorAll('.button').forEach(button => {
+  $$('.button').forEach(button => {
     button.setAttribute('aria-busy', String(state.busy || running));
   });
   $('#training-plan').textContent = firstError
@@ -912,7 +917,7 @@ stageStop.addEventListener('click', () => {
   state.run?.stop();
   renderRunUI();
 });
-document.querySelectorAll('input[name="speed"]').forEach(radio => {
+$$('input[name="speed"]').forEach(radio => {
   radio.addEventListener('change', () => {
     if (radio.checked) state.speed = radio.value;
   });
@@ -933,16 +938,14 @@ function resetView() {
   const step = now => {
     const t = duration ? Math.min(1, (now - start) / duration) : 1;
     const eased = 1 - (1 - t) ** 3;
-    state.zoom = t === 1 ? 1 : from.zoom + (1 - from.zoom) * eased;
-    state.panX = t === 1 ? 0 : from.panX * (1 - eased);
-    state.panY = t === 1 ? 0 : from.panY * (1 - eased);
+    Object.assign(state, mix(from, { zoom: 1, panX: 0, panY: 0 }, eased));
     updateNetworkView();
     if (t < 1) viewTween = requestAnimationFrame(step);
   };
   viewTween = requestAnimationFrame(step);
 }
 
-document.querySelectorAll('[data-zoom-step]').forEach(button => {
+$$('[data-zoom-step]').forEach(button => {
   button.addEventListener('click', () => zoomTo(state.zoom + Number(button.dataset.zoomStep) * .1));
 });
 resetViewButton.addEventListener('click', resetView);
@@ -1008,7 +1011,7 @@ function initializeGlass() {
   const surfaces = new Map();
   let frame = 0;
 
-  document.querySelectorAll('.liquid-glass').forEach(element => {
+  $$('.liquid-glass').forEach(element => {
     surfaces.set(element, { size: '' });
   });
 

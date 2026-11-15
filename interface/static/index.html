@@ -87,39 +87,35 @@
           <kbd class="drawer-hint" aria-hidden="true">Esc</kbd>
         </header>
         <div class="drawer-content" tabindex="0">
-          <p class="training-explanation">Un ejemplo es una fila de la tabla Xor. Cuatro ejemplos forman una época.</p>
-          <p class="training-plan" id="training-plan"></p>
+          <p class="training-explanation">Enseña a la red a resolver XOR o explora un ejemplo paso a paso.</p>
           <div class="actions">
             <button class="liquid-glass button primary" id="train-button" type="button">
               <svg class="control-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 11 7-11 7z"/></svg>
               <strong>Entrenar</strong>
-              <small>Automático</small>
+              <small>Aprende hasta alcanzar el objetivo</small>
             </button>
             <button class="liquid-glass button secondary" id="step-button" type="button">
               <svg class="control-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h12m-5-5 5 5-5 5m9-11v12"/></svg>
               <strong>Un ejemplo</strong>
-              <small>Manual</small>
+              <small>Observa una actualización de la red</small>
             </button>
           </div>
-          <div class="speed" role="radiogroup" aria-labelledby="speed-label">
-            <span class="speed-label" id="speed-label">Velocidad</span>
-            <div class="segmented">
-              <label><input type="radio" name="speed" value="slow"><span>Lenta</span></label>
-              <label><input type="radio" name="speed" value="normal" checked><span>Normal</span></label>
-              <label><input type="radio" name="speed" value="fast"><span>Rápida</span></label>
-            </div>
-          </div>
-          <dl class="mode-help">
-            <div><dt>Entrenar</dt><dd>Repite ejemplos solo: los primeros en cámara lenta y el resto acelerado, hasta la pérdida objetivo.</dd></div>
-            <div><dt>Un ejemplo</dt><dd>Procesa una sola fila y se detiene para que veas cada fase.</dd></div>
-          </dl>
           <p class="step-status" id="step-status" role="status"></p>
           <details class="panel-section" id="step-details" hidden>
             <summary>Detalle del último ejemplo</summary>
             <div class="step-readout" id="step-readout"></div>
           </details>
           <details class="panel-section" id="training-options">
-            <summary>Parámetros de entrenamiento</summary>
+            <summary>Ajustes de entrenamiento</summary>
+          <div class="speed" role="radiogroup" aria-labelledby="speed-label">
+            <span class="speed-label" id="speed-label">Animación</span>
+            <div class="segmented">
+              <label><input type="radio" name="speed" value="slow"><span>Lenta</span></label>
+              <label><input type="radio" name="speed" value="normal" checked><span>Normal</span></label>
+              <label><input type="radio" name="speed" value="fast"><span>Rápida</span></label>
+            </div>
+          </div>
+          <p class="training-plan" id="training-plan"></p>
             <form class="settings" id="settings">
               <label>Tasa de aprendizaje<input id="learning-rate" type="number" min="0.001" max="1" step="0.001" value="0.25" required aria-describedby="parameter-help settings-feedback"></label>
               <label>Épocas máximas<input id="max-epochs" type="number" min="1" max="100000" step="1" value="10000" required aria-describedby="parameter-help settings-feedback"></label>
@@ -128,11 +124,11 @@
               <p class="settings-hint settings-feedback" id="settings-feedback" role="status"></p>
               <p class="settings-hint">Si cambias los parámetros, el próximo entrenamiento o ejemplo inicia una nueva red.</p>
             </form>
-          </details>
           <button class="button ghost" id="reset-button" type="button">
             <svg class="control-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8M3 3v5h5"/></svg>
             Reiniciar sin entrenar
           </button>
+          </details>
         </div>
       </aside>
 
