@@ -728,27 +728,6 @@ function drawChart(history) {
 
 function drawPredictions(predictions) {
   const table = $('#prediction-table');
-<<<<<<< HEAD
-  if (!predictions.length) { table.innerHTML = '<div class="prediction-empty">La tabla aparecerá después del primer paso.</div>'; return; }
-  table.innerHTML = `<div class="prediction-row head"><span>Entrada</span><span>Objetivo</span><span>Salida</span><span>Estado</span></div>` + predictions.map(row => `<div class="prediction-row"><strong>(${row.inputs.join(', ')})</strong><span>${row.expected}</span><span>${format(row.output, 3)}</span><span class="${row.is_correct ? 'ok' : 'bad'}">${row.is_correct ? 'OK' : '—'}</span></div>`).join('');
-}
-
-function drawStep(last) {
-  if (!last || last.kind === 'train') { $('#step-readout').innerHTML = '<span class="eyebrow">ÚLTIMA ACTUALIZACIÓN</span><p>Inicia una red para ver el detalle de cada iteración.</p>'; return; }
-  const input = `(${last.inputs.join(', ')})`; $('#step-readout').innerHTML = `<span class="eyebrow">ITERACIÓN ${last.iteration} · ÉPOCA ${last.epoch}</span><p>Entrada <strong>${input}</strong> · objetivo <strong>${last.expected}</strong><br>Activación de salida <strong>${format(last.activations_before.output, 4)}</strong>${last.epoch_loss != null ? ` · pérdida <strong>${format(last.epoch_loss, 5)}</strong>` : ''}</p>`;
-}
-
-async function action(path, body = null) { setBusy(true); $('#footer-message').textContent = 'Actualizando estado...'; try { update(await request(path, 'POST', body)); $('#footer-message').textContent = 'Estado actualizado'; } catch (error) { $('#footer-message').textContent = error.message; } finally { setBusy(false); } }
-$('#train-button').addEventListener('click', () => action('/api/train', config()));
-$('#step-button').addEventListener('click', () => action('/api/step'));
-$('#reset-button').addEventListener('click', () => action('/api/start', config()));
-document.querySelectorAll('[data-zoom]').forEach(button => button.addEventListener('click', () => { const mode = button.dataset.zoom; state.zoom = mode === 'reset' ? 1 : Math.max(.65, Math.min(1.7, state.zoom + (mode === 'in' ? .1 : -.1))); if (mode === 'reset') { state.panX = 0; state.panY = 0; } $('#zoom-label').textContent = `${Math.round(state.zoom * 100)}%`; drawNetwork(state.data || {parameters:{}}); }));
-canvasWrap.addEventListener('wheel', event => { event.preventDefault(); state.zoom = Math.max(.65, Math.min(1.7, state.zoom + (event.deltaY < 0 ? .08 : -.08))); $('#zoom-label').textContent = `${Math.round(state.zoom * 100)}%`; drawNetwork(state.data || {parameters:{}}); }, { passive:false });
-canvasWrap.addEventListener('pointerdown', event => { state.dragging = true; state.lastX = event.clientX; state.lastY = event.clientY; canvasWrap.classList.add('dragging'); canvasWrap.setPointerCapture(event.pointerId); });
-canvasWrap.addEventListener('pointermove', event => { if (!state.dragging) return; state.panX += event.clientX - state.lastX; state.panY += event.clientY - state.lastY; state.lastX = event.clientX; state.lastY = event.clientY; drawNetwork(state.data || {parameters:{}}); });
-canvasWrap.addEventListener('pointerup', () => { state.dragging = false; canvasWrap.classList.remove('dragging'); });
-request('/api/state').then(update).catch(error => { $('#footer-message').textContent = error.message; });
-=======
   if (!predictions.length) {
     table.innerHTML = '<p class="prediction-empty">Los resultados aparecen después del primer ejemplo.</p>';
     return;
@@ -1065,4 +1044,3 @@ function initializeGlass() {
 }
 
 initializeGlass();
->>>>>>> bd9353d8aa6a5344ac3368d1548df73805a5a6a8
