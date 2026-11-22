@@ -1,32 +1,28 @@
 # XOR Lab
 
-<p align="center"><img src="docs/interfaz.png" width="850" alt="Interfaz interactiva de XOR Lab"></p>
+<p align="center"><img src="docs/interfaz.png" width="680" alt="Visualización de la red neuronal XOR"></p>
 
-**XOR Lab** muestra cómo una red neuronal pequeña aprende una operación que no puede resolverse con una sola frontera lineal. La red combina dos entradas, dos neuronas ocultas y una salida para aprender la tabla XOR.
+Una exploración visual del aprendizaje de una red neuronal. XOR Lab enseña cómo una red con una capa oculta puede aprender la operación XOR, cuyo patrón no se separa con una sola línea.
 
-## Qué puedes explorar
+## Qué ocurre dentro de la red
 
-La interfaz permite observar las entradas y activaciones de la red, entrenar paso a paso o automáticamente, ajustar el aprendizaje y explorar el diagrama con zoom y arrastre. Las cuatro combinaciones de entrada se contrastan con sus predicciones para ver cómo cambia la salida a medida que aprende.
+Dos entradas se conectan con dos neuronas ocultas y una neurona de salida. Cada neurona combina sus entradas con pesos y sesgos y aplica una sigmoide. Durante el entrenamiento, la retropropagación compara la predicción con el resultado esperado y ajusta los parámetros para reducir el error. En la interfaz puedes observar las conexiones y activaciones, avanzar paso a paso o entrenar automáticamente, cambiar el ritmo y comparar las cuatro combinaciones de la tabla XOR.
 
-## La lógica
+## Probar XOR Lab
 
-Cada neurona calcula una suma ponderada de sus entradas y aplica la función sigmoide. Las dos activaciones ocultas alimentan la salida. En cada ejemplo, la retropropagación compara la predicción con el valor esperado y ajusta pesos y sesgos para reducir el error cuadrático medio. La sesión conserva los parámetros y el avance del entrenamiento para reflejarlos en la interfaz.
-
-## Abrir XOR Lab
-
-Descarga la versión para Windows y ejecuta el archivo. No requiere instalar Python:
+Descarga y ejecuta la aplicación portable para Windows; no requiere instalar Python.
 
 <p align="center"><a href="https://github.com/sebasjq/xor-neural-network/releases/latest/download/XOR-Lab-1.0.0-portable.exe"><strong>⬇ Descargar XOR Lab para Windows</strong></a></p>
 
-También puedes iniciarlo desde el código con Python 3:
+También puedes abrir el código con Python 3:
 
 ```bash
 python -m interface.app
 ```
 
-Abre `http://127.0.0.1:8000` en el navegador.
+Luego visita `http://127.0.0.1:8000`.
 
-## Colaboradores
+## Equipo
 
 - Simón Tomás Paipa Bravo
 - Juan Sebastián Sánchez Quimbaya
